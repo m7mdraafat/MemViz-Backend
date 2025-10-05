@@ -13,6 +13,8 @@ public static class DependencyInjection
     {
         // Repositories - Phase 6 temporary implementations
         services.AddScoped<ISimulationRepository, InMemorySimulationRepository>();
+        // Add infrastructure services here, e.g.:
+        // services.AddTransient<IMyRepository, MyRepository>();
 
         return services;
     }

@@ -8,11 +8,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MemViz.Application\MemViz.Application.csproj" />
+    <ProjectReference Include="..\MemViz.Infrastructure\MemViz.Infrastructure.csproj" />
+    <ProjectReference Include="..\MemViz.Languages\MemViz.Languages.csproj" />
     <ProjectReference Include="..\MemViz.Shared\MemViz.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Middleware\" />
   </ItemGroup>
 
 </Project>

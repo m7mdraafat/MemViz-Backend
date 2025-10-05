@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace MemViz.Application;
 
 public static class DependencyInjection

@@ -1,15 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\MemViz.Domain\MemViz.Domain.csproj" />
-    <ProjectReference Include="..\MemViz.Shared\MemViz.Shared.csproj" />
-    <ProjectReference Include="..\MemViz.Application\MemViz.Application.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MemViz.Domain\MemViz.Domain.csproj" />
+    <ProjectReference Include="..\MemViz.Shared\MemViz.Shared.csproj" />
+    <ProjectReference Include="..\MemViz.Application\MemViz.Application.csproj" />
+  </ItemGroup>
 
 </Project>

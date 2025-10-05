@@ -1,0 +1,6 @@
+@MemViz.Api_HostAddress = http://localhost:5267
+
+GET {{MemViz.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

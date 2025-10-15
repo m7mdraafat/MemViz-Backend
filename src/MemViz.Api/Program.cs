@@ -1,58 +1,141 @@
+using Asp.Versioning;
 using MemViz.Api.Configurations;
 using MemViz.Api.Middleware;
 using MemViz.Application;
 using MemViz.Infrastructure;
 using MemViz.Languages;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+// Add services to the container
+try
+{
+    // Logging Configuration (must be first)
+    builder.Services.AddLoggingConfiguration(builder.Configuration);
+    builder.Host.UseSerilog();
 
-// Add swagger
-builder.Services.AddSwaggerConfiguration();
+    // Core Services
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    
+    // Application Services
+    builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddApplicationServices();
+    builder.Services.AddLanguageServices();
 
-// Add CORS
-builder.Services.AddCorsConfiguration(builder.Configuration);
+    // CORS Configuration
+    builder.Services.AddCorsConfiguration(builder.Configuration);
 
-// Add SignalR for real-time communication
-builder.Services.AddSignalR();
+    // SignalR
+    builder.Services.AddSignalR(options =>
+    {
+        options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+        options.MaximumReceiveMessageSize = 64 * 1024; // 64KB
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    });
 
-// Add layers
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-builder.Services.AddLanguagesServices(builder.Configuration);
+    // Swagger Documentation
+    builder.Services.AddSwaggerDocumentation();
 
-// Add Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+    // Health Checks
+    builder.Services.AddHealthChecks()
+        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+
+    // API Versioning (for future use)
+    builder.Services.AddApiVersioning(options =>
+    {
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.ApiVersionReader = ApiVersionReader.Combine(
+            new QueryStringApiVersionReader("version"),
+            new HeaderApiVersionReader("X-Version"));
+    }).AddApiExplorer(setup =>
+    {
+        setup.GroupNameFormat = "'v'VVV";
+        setup.SubstituteApiVersionInUrl = true;
+    });
+
+    Log.Information("MemViz API services configured successfully");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Failed to configure MemViz API services");
+    throw;
+}
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    // Logging
+    app.UseLoggingConfiguration();
+
+    // Global Exception Handling
+    app.UseMiddleware<GlobalExceptionMiddleware>();
+
+    // Development-specific middleware
+    if (app.Environment.IsDevelopment())
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MemViz API v1");
-        options.RoutePrefix = string.Empty; // Set Swagger UI at root
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseHsts();
+    }
+
+    // Security Headers
+    app.UseHttpsRedirection();
+    // app.UseSecurityHeaders();
+
+    // CORS
+    app.UseCors("AllowAll");
+
+    // Static Files (for custom Swagger CSS)
+    app.UseStaticFiles();
+
+    // Swagger Documentation
+    app.UseSwaggerDocumentation(app.Environment);
+
+    // Authentication & Authorization (for future use)
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Routing
+    app.UseRouting();
+
+    // Controllers
+    app.MapControllers();
+
+    // Health Checks
+    app.MapHealthChecks("/health");
+
+    // API Info Endpoint
+    app.MapGet("/", () => new
+    {
+        Application = "MemViz API",
+        Version = "1.0.0",
+        Environment = app.Environment.EnvironmentName,
+        Documentation = "/api/docs",
+        Health = "/health",
+        SignalRHub = "/hubs/simulation",
+        Timestamp = DateTimeOffset.UtcNow
     });
+
+    Log.Information("MemViz API pipeline configured successfully");
+    Log.Information("MemViz API starting on {Environment} environment", app.Environment.EnvironmentName);
+
+    app.Run();
 }
-
-// Add custom middleware
-app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseMiddleware<ExceptionMiddleware>();
-
-// Use CORS
-app.UseCorsConfiguration();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.UseHttpsRedirection();
-
-app.Logger.LogInformation("MemViz API starting...");
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "MemViz API terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

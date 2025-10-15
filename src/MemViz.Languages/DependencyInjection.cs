@@ -1,21 +1,17 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 
 namespace MemViz.Languages;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddLanguagesServices(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddLanguageServices(this IServiceCollection services)
     {
-        // Register language processors
-        // services.AddScoped<ILanguageProcessor, CLanguageProcessor>();
-        // services.AddScoped<ILanguageProcessor, CppLanguageProcessor>();
+        // Language registry and adapters will be registered here when C++ is implemented
+        // Core interfaces are available in:
+        // - MemViz.Languages.Interfaces (ILanguageAdapter, ILanguageRegistry)
+        // - MemViz.Languages.Core (ILanguageParser, ILanguageSimulator)
+        // - MemViz.Languages.LanguageModels (SyntaxTree, AST nodes)
         
-        // Register language factory
-        // services.AddScoped<ILanguageProcessorFactory, LanguageProcessorFactory>();
-
         return services;
     }
 }

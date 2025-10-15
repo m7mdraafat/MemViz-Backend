@@ -1,3 +1,5 @@
+using MemViz.Application.Interfaces;
+using MemViz.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,8 +11,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Add infrastructure services here, e.g.:
-        // services.AddTransient<IMyRepository, MyRepository>();
+        // Repositories - Phase 6 temporary implementations
+        services.AddScoped<ISimulationRepository, InMemorySimulationRepository>();
 
         return services;
     }

@@ -33,4 +33,10 @@ public sealed record Error
 
     public static Error Forbidden(string code, string message, Dictionary<string, object>? metaData = null)
         => new(code, message, ErrorType.Forbidden, metaData);
+
+    public static Error Persistence(string code, string message, Dictionary<string, object>? metaData = null)
+        => new(code, message, ErrorType.Persistence, metaData);
+        
+    public static Error Unexpected(string code, string message, Dictionary<string, object>? metaData = null)
+        => new(code, message, ErrorType.Unexpected, metaData);
 }
